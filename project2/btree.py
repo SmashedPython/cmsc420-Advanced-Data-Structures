@@ -39,7 +39,12 @@ class Btree():
 
     # Insert.
     def insert(self, key: int, value: str):
-        # Fill in the details.
+        if self.root == None:
+            self.root = Node(keys=[key], values=[value], children=[])
+            return
+        
+        
+        
         print(f'Insert: {key} {value}') # This is just here to make the code run, you can delete it.
 
     # Delete.

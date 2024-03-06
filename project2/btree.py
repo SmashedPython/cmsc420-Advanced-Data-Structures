@@ -36,45 +36,106 @@ class Btree():
         else:
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent=2)
+    
+
+    def insert_withspace(self,node,key,value):
+        m = self.m
+        succes_insert = False
+
+        for i in range(len(node.keys) - 1):
+            if node.keys[i] > key:
+                node.keys.insert(i,key)
+                node.values.insert(i,value)
+                succes_insert = True
+                break
+        
+        if not succes_insert:
+            node.keys.append(key)
+            node.values.append(value)
+        
+
+    def find_parent_index(node):
+        p = node.parent
+        target = node.keys[0]
+        for i in range(parent.keys):
+            if parent.keys > target:
+                return i
+        
+        return i + 1
 
     # Insert.
     def insert(self, key: int, value: str):
         if self.root == None:
             self.root = Node(keys=[key], values=[value])
             return
-        
-        # try rotation first 
-        
-        # if root is full, create a new root
-        if len(root.keys) == m - 1:
-            newroot = Node(children= [])
-            self.root = newroot
-            newroot.children.insert(0,root)
-            self.split_child(newroot,0)
-            self.insert_unfull(node=newroot,key=key,value=value)
-        else:
-            self.insert_unfull(root,key,value)
 
-    def split_child(self, node, index):
         m = self.m
 
-        child = node.children[index]
-        newnode = Node()
-        node.children.insert(index + 1,newnode)
+        # Go to the leaf
+        current = self.root
+        while not is_leaf(current):
+            for i in range(len(current.keys)):
 
-        #promote the middle one into the node
-        node.keys.insert(index, child.keys[m//2])
-        node.values.insert(index, child.values[m//2])
+                if current.keys[i] > key:
+                    current = current.children[i]
+                    break
+            if i == range(len(current.keys)):
+                current = current.children[i+1]
 
-        #split into 2
-        child.keys = child.keys[0 : m//2 - 1]
-        newnode.keys = child.keys[m//2 + 1: ]
-        child.values = child.values[0 : m//2 - 1]
-        newnode.values = child.values[m//2 + 1: ]
+        #now current is a leaf
+        if len(current.keys) < m - 1:
+            # if it has extra space
+            insert_withspace(current, key, value)
+        else:
+            # try rotation first
+            i = find_parent_index(current)
+            parent = current.parent
+            if parent.children[i - 1] < m - 1:
+                # left has space
+                left_rotate(parent, i-1)
+            elif parent.children[i] < m - 1:
+                right_rotate(parent, i-1)
+            else:
+               # if there is no space in adjacent siblings
 
-        if not check_leaf(child):
-            newnode.children = child.children[m//2: ]
-            child.children = child.children[ :m//2-1 ]
+
+            
+
+
+        # try rotation first 
+        
+
+        # if root is full, create a new root
+
+        # if len(root.keys) == m - 1:
+        #     newroot = Node(children= [])
+        #     self.root = newroot
+        #     newroot.children.insert(0,root)
+        #     self.split_child(newroot,0)
+        #     self.insert_unfull(node=newroot,key=key,value=value)
+        # else:
+        #     self.insert_unfull(root,key,value)
+
+    # def split_child(self, node, index):
+    #     m = self.m
+
+    #     child = node.children[index]
+    #     newnode = Node()
+    #     node.children.insert(index + 1,newnode)
+
+    #     #promote the middle one into the node
+    #     node.keys.insert(index, child.keys[m//2])
+    #     node.values.insert(index, child.values[m//2])
+
+    #     #split into 2
+    #     child.keys = child.keys[0 : m//2 - 1]
+    #     newnode.keys = child.keys[m//2 + 1: ]
+    #     child.values = child.values[0 : m//2 - 1]
+    #     newnode.values = child.values[m//2 + 1: ]
+
+    #     if not check_leaf(child):
+    #         newnode.children = child.children[m//2: ]
+    #         child.children = child.children[ :m//2-1 ]
 
 
 

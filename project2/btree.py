@@ -61,7 +61,7 @@ class Btree():
             if parent.keys > target:
                 return i
         
-        return i + 1
+        return i
 
     # Insert.
     def insert(self, key: int, value: str):
@@ -90,10 +90,10 @@ class Btree():
             # try rotation first
             i = find_parent_index(current)
             parent = current.parent
-            if parent.children[i - 1] < m - 1:
+            if i-1 > 0 and parent.children[i - 1] < m - 1:
                 # left has space
                 left_rotate(parent, i-1)
-            elif parent.children[i] < m - 1:
+            elif i < len(parent.children) parent.children[i] < m - 1:
                 right_rotate(parent, i-1)
             else:
                # if there is no space in adjacent siblings

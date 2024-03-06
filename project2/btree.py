@@ -37,12 +37,27 @@ class Btree():
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent=2)
 
+    def find_leaf(node, key):
+        if node.children == None:
+            return node
+        else:
+            if node.keys[0] and node.keys[0] > key:
+                find_leaf(node.children[0],key)
+            elif node.keys[-1] and  node.keys[-1] < key:
+                find_leaf(node.children[-1],key)
+            else:
+                for i in range(1,len(node.keys)):
+                    if node.keys[i-1] and node.keys[i] and node.keys[i-1] < key < node.keys[i]:
+                        find_leaf(node.children[i],key)
+
     # Insert.
     def insert(self, key: int, value: str):
         if self.root == None:
             self.root = Node(keys=[key], values=[value], children=[])
             return
-        
+
+        # Find correct leaf node for insertion
+        leaf = self.find_leaf(self.root,key)
         
         
         print(f'Insert: {key} {value}') # This is just here to make the code run, you can delete it.

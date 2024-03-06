@@ -37,30 +37,82 @@ class Btree():
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent=2)
 
-    def find_leaf(node, key):
-        if node.children == None:
-            return node
-        else:
-            if node.keys[0] and node.keys[0] > key:
-                find_leaf(node.children[0],key)
-            elif node.keys[-1] and  node.keys[-1] < key:
-                find_leaf(node.children[-1],key)
-            else:
-                for i in range(1,len(node.keys)):
-                    if node.keys[i-1] and node.keys[i] and node.keys[i-1] < key < node.keys[i]:
-                        find_leaf(node.children[i],key)
-
     # Insert.
     def insert(self, key: int, value: str):
         if self.root == None:
-            self.root = Node(keys=[key], values=[value], children=[])
+            self.root = Node(keys=[key], values=[value])
             return
+        
+        # try rotation first 
+        
+        # if root is full, create a new root
+        if len(root.keys) == m - 1:
+            newroot = Node(children= [])
+            self.root = newroot
+            newroot.children.insert(0,root)
+            self.split_child(newroot,0)
+            self.insert_unfull(node=newroot,key=key,value=value)
+        else:
+            self.insert_unfull(root,key,value)
 
-        # Find correct leaf node for insertion
-        leaf = self.find_leaf(self.root,key)
+    def split_child(self, node, index):
+        m = self.m
+
+        child = node.children[index]
+        newnode = Node()
+        node.children.insert(index + 1,newnode)
+
+        #promote the middle one into the node
+        node.keys.insert(index, child.keys[m//2])
+        node.values.insert(index, child.values[m//2])
+
+        #split into 2
+        child.keys = child.keys[0 : m//2 - 1]
+        newnode.keys = child.keys[m//2 + 1: ]
+        child.values = child.values[0 : m//2 - 1]
+        newnode.values = child.values[m//2 + 1: ]
+
+        if not check_leaf(child):
+            newnode.children = child.children[m//2: ]
+            child.children = child.children[ :m//2-1 ]
+
+
+
+    def check_leaf(node):
+        if node.children == None or  node.children == []:
+            return True
+        return False
+
+    def insert_unfull(self,node,key,value):
+        m = self.m
+        i = len(node.keys)-1
+
         
-        
-        print(f'Insert: {key} {value}') # This is just here to make the code run, you can delete it.
+        if check_leaf(node):
+            # if the node is a leaf, we add key/value into the node
+            node.keys.append(None)
+            node.values.append(None)
+            while i >= 0 and key < node.keys[i]:
+                node.keys[i+1] = node.keys[i]
+                node.values[i+1] = node.values[i]
+
+                i -= 1
+            node.keys[i+1] = key
+            node.values[i+1] = value
+        else:
+            # if it is not a leaf, we find the correct subtree
+            while i >= 0 and key < node.keys[i]:
+                i -= 1
+            i += 1
+            # if child node is full, split it
+            if len(node.children[i]) == m-1:
+                self.split_child(node,i)
+                if key > x.keys[i]:
+                    i += 1
+            self.insert_unfull(node = node.children[i],key=key,value=value)
+
+
+
 
     # Delete.
     def delete(self, key: int):

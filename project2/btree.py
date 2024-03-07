@@ -122,33 +122,43 @@ class Btree():
                 return
 
     def is_leaf(self, node):
-        if node.children == None or len(node.children) == 0:
+        if node.children == None or len(node.children) == 0 or all(child is None for child in node.children):
             return True
         return False
 
+    def CLEAN_NULL(self,node):
+        node.children = [i for i in node.children if i is not None]
+        for child in node.children:
+            self.CLEAN_NULL(child)
 
+
+    def ADD_NULL(self, node):
+        if self.is_leaf(node):
+            node.children = [None] *(len(node.keys) + 1)
+        else:
+            for child in node.children:
+                if child != None:
+                    self.ADD_NULL(child)
+
+    def find_leaf(self, key,node):
+        if self.is_leaf(node):
+            return node
+        for i in range(len(node.keys)):
+            if key < node.keys[i]:
+                return self.find_leaf(key,node.children[i])
+        return self.find_leaf(key,node.children[-1])
     # Insert.
     def insert(self, key: int, value: str):
         if self.root == None:
-            self.root = Node(keys=[key], values=[value],children=[])
+            self.root = Node(keys=[key], values=[value],children=[None,None])
             return
+
+        self.CLEAN_NULL(self.root)
 
         m = self.m
 
         # Go to the leaf
-        current = self.root
-
-        while not self.is_leaf(current):
-
-            i = 0
-            while i < len(current.keys):
-
-                if current.keys[i] > key:
-                    current = current.children[i]
-                    break
-                i += 1
-            if i == len(current.keys):
-                current = current.children[i]
+        current = self.find_leaf(key,self.root)
 
         #now current is a leaf
         if len(current.keys) < m - 1:
@@ -159,15 +169,13 @@ class Btree():
             if self.root == current: # case we only have a root and it is full
                 self.insert_helper(current,key,value)
                 self.split_promote(current)
+                self.ADD_NULL(self.root)
                 return
 
             # try rotation first
             i = self.find_parent_index(current)
             parent = current.parent
-            # print(parent.keys)
-            # print(self.dump())
-            # print(parent.children)
-            # print("here0")
+
             if i-1 >= 0 and len(parent.children[i - 1].keys) < m - 1:
                 # left has space
 
@@ -185,6 +193,8 @@ class Btree():
                 self.insert_helper(current,key,value)
                 self.split_promote(current)
 
+        self.ADD_NULL(self.root)
+
 
 
 
@@ -199,23 +209,34 @@ class Btree():
         return json.dumps(None)
 
 
-t = Btree(3)
-t.insert(1,1)
-t.insert(2,2)
-t.insert(3,3)
-t.insert(0,0)
-t.insert(4,4)
+# t = Btree(3)
+# t.insert(1,1)
 
-t.insert(5,5)
+# t.insert(2,2)
+# t.insert(3,3)
+# t.insert(0,0)
+# t.insert(4,4)
 
-t.insert(6,6)
-t.insert(-1,-1)
+# t.insert(5,5)
 
-t.insert(-2,-2)
-print("root",t.root.keys)
-print(t.dump())
-t.insert(7,7)
+# t.insert(6,6)
+# t.insert(-1,-1)
 
-print(t.dump())
+# t.insert(-2,-2)
+# t.insert(7,7)
 
+# print(t.dump())
+# t = Btree(3)
+# t.insert(77,"04PP93ZH9T")
+# t.insert(76,"HE8AWZKX91")
+# t.insert(99,"TG4CNACOBA")
+# t.insert(44,"RJCJ6AG6WG")
+# t.insert(21,"T34BOLK8K4")
+# t.insert(58,"DHJ9XLHDZP")
 
+# t.insert(67,"YPJMKFOU7L")
+# t.insert(86,"J3HMG3WIND")
+# t.insert(63,"X4EYGXZBBV")
+
+# t.insert(85,"31C5Y78YEI")
+# print(t.dump())

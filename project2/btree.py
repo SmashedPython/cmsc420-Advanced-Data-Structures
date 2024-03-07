@@ -84,10 +84,14 @@ class Btree():
     def split_promote(self, node):
         m = self.m
 
+        # if the node is not full, then just do nothing
+
         if len(node.keys) <= m-1:
             return
+
         else:
             if node != self.root:
+
                 parent = node.parent
 
                 median_key = node.keys[(m-1)//2]
@@ -95,6 +99,12 @@ class Btree():
 
                 newnode1 = Node(keys=node.keys[0:(m-1)//2], values= node.values[0:(m-1)//2], children= node.children[0:(m-1)//2 + 1], parent = parent)
                 newnode2 = Node(keys=node.keys[(m-1)//2 + 1:], values= node.values[(m-1)//2 + 1:], children= node.children[(m-1)//2 + 1:], parent = parent)
+                
+                # update parents
+                for child in newnode1.children:
+                    child.parent = newnode1
+                for child in newnode2.children:
+                    child.parent = newnode2
 
                 self.insert_helper(parent,median_key, median_value)
                 for i in range(len(parent.children)):
@@ -105,7 +115,9 @@ class Btree():
                         break
                 
                 self.split_promote(parent)
+            # if the node we going to split is the root
             else:
+
                 median_key = node.keys[(m-1)//2]
                 median_value = node.values[(m-1)//2]
 
@@ -135,7 +147,6 @@ class Btree():
         for child in node.children:
             self.CLEAN_NULL(child)
 
-
     def ADD_NULL(self, node):
         if self.is_leaf(node):
             node.children = [None] *(len(node.keys) + 1)
@@ -164,10 +175,11 @@ class Btree():
         # Go to the leaf
         current = self.find_leaf(key,self.root)
 
-        #now current is a leaf
+        # insert the key into the node
         if len(current.keys) < m - 1:
             # if it has extra space
             self.insert_helper(current, key, value)
+
         else:
 
             if self.root == current: # case we only have a root and it is full
@@ -186,14 +198,14 @@ class Btree():
                 self.insert_helper(current,key,value)
                 self.left_rotate(parent, i-1)
 
-            elif i < len(parent.children) - 1 and len(parent.children[i + 1].keys)< m - 1:
-                # right has space
+            elif i < len(parent.children) - 1 and len(parent.children[i + 1].keys) < m - 1:
 
+                # right has space
                 self.insert_helper(current,key,value)
                 self.right_rotate(parent, i)
-            else:
-               # if there is no space in adjacent siblings
 
+            else:
+               # if there is no space in adjacent siblings we perform split and  promot
                 self.insert_helper(current,key,value)
                 self.split_promote(current)
 

@@ -65,10 +65,12 @@ class Btree():
         node.children[index].keys.append(node.keys[index ])
         node.children[index].values.append(node.values[index ])
 
-        # print("here is the node being promote", node.children[index+1].keys)
         node.keys[index] = node.children[index+1].keys.pop(0)
-
         node.values[index] = node.children[index+1].values.pop(0)
+
+        # until the sibling balanced
+        if len(node.children[index + 1].keys) - len(node.children[index].keys) > 1:
+            self.left_rotate(node, index)
 
     def right_rotate(self, node, index):
         node.children[index + 1].keys.insert(0, node.keys[index])
@@ -76,6 +78,9 @@ class Btree():
 
         node.keys[index] = node.children[index].keys.pop(-1)
         node.values[index] = node.children[index].values.pop(-1)
+
+        if len(node.children[index].keys) - len(node.children[index + 1].keys) > 1:
+            self.right_rotate(node, index)
 
     def split_promote(self, node):
         m = self.m

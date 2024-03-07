@@ -37,7 +37,6 @@ class Btree():
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent=2)
     
-
     def insert_helper(self,node,key,value):
         succes_insert = False
 
@@ -209,10 +208,26 @@ class Btree():
         print(f'Delete: {key}') # This is just here to make the code run, you can delete it.
 
     # Search
-    def search(self,key) -> str:
-        # Fill in and tweak the return.
-        return json.dumps(None)
+    def search_helper(self, key, node, path):
+        if key in node.keys:
+            index = node.keys.index(key)
+            path.append(node.values[index])
+            return path
+        else:
+            for i in range(len(node.keys)):
+                if key < node.keys[i]:
+                    path.append(i)
+                    return self.search_helper(key, node.children[i], path)
+            
+            path.append(len(node.keys))
+            return self.search_helper(key, node.children[-1], path)
 
+
+    def search(self,key) -> str:
+        if key in self.root.keys:
+            return json.dumps([self.root.values[self.root.keys.index(key)]])
+        self.CLEAN_NULL(self.root)
+        return json.dumps(self.search_helper(key,self.root,[]))
 
 # t = Btree(3)
 # t.insert(1,1)

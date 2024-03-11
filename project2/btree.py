@@ -61,11 +61,16 @@ class Btree():
         return len(p.keys)
 
     def left_rotate(self, node, index):
-        node.children[index].keys.append(node.keys[index ])
-        node.children[index].values.append(node.values[index ])
+        node.children[index].keys.append(node.keys[index])
+        node.children[index].values.append(node.values[index])
+
 
         node.keys[index] = node.children[index+1].keys.pop(0)
         node.values[index] = node.children[index+1].values.pop(0)
+
+        if not self.is_leaf(node.children[index]):
+            node.keys[index].children.append(node.keys[index+1].pop(-1))
+
 
         # until the sibling balanced
         if len(node.children[index + 1].keys) - len(node.children[index].keys) > 1:
@@ -74,6 +79,9 @@ class Btree():
     def right_rotate(self, node, index):
         node.children[index + 1].keys.insert(0, node.keys[index])
         node.children[index + 1].values.insert(0,node.values[index])
+
+        if not self.is_leaf(node.children[index]):
+            node.keys[index + 1].children.insert(0, node.keys[index].pop(0))
 
         node.keys[index] = node.children[index].keys.pop(-1)
         node.values[index] = node.children[index].values.pop(-1)

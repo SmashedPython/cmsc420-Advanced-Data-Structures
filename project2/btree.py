@@ -96,33 +96,47 @@ class Btree():
 
         if len(node.keys) <= m-1:
             return
-
+        
+        
         else:
+            
             if node != self.root:
-
+                # try rotation first
+                i = self.find_parent_index(node)
                 parent = node.parent
+                if i-1 >= 0 and len(parent.children[i - 1].keys) < m - 1:
+                    # left has space
+                    self.left_rotate(parent, i-1)
 
-                median_key = node.keys[(m-1)//2]
-                median_value = node.values[(m-1)//2]
+                elif i < len(parent.children) - 1 and len(parent.children[i + 1].keys) < m - 1:
+                    # right has space
+                    self.right_rotate(parent, i)
 
-                newnode1 = Node(keys=node.keys[0:(m-1)//2], values= node.values[0:(m-1)//2], children= node.children[0:(m-1)//2 + 1], parent = parent)
-                newnode2 = Node(keys=node.keys[(m-1)//2 + 1:], values= node.values[(m-1)//2 + 1:], children= node.children[(m-1)//2 + 1:], parent = parent)
-                
-                # update parents
-                for child in newnode1.children:
-                    child.parent = newnode1
-                for child in newnode2.children:
-                    child.parent = newnode2
+                # we have to promote
+                else:
+                    parent = node.parent
 
-                self.insert_helper(parent,median_key, median_value)
-                for i in range(len(parent.children)):
-                    if median_key in parent.children[i].keys:
-                        parent.children.pop(i)
-                        parent.children.insert(i,newnode2)
-                        parent.children.insert(i,newnode1)
-                        break
-                
-                self.split_promote(parent)
+                    median_key = node.keys[(m-1)//2]
+                    median_value = node.values[(m-1)//2]
+
+                    newnode1 = Node(keys=node.keys[0:(m-1)//2], values= node.values[0:(m-1)//2], children= node.children[0:(m-1)//2 + 1], parent = parent)
+                    newnode2 = Node(keys=node.keys[(m-1)//2 + 1:], values= node.values[(m-1)//2 + 1:], children= node.children[(m-1)//2 + 1:], parent = parent)
+                    
+                    # update parents
+                    for child in newnode1.children:
+                        child.parent = newnode1
+                    for child in newnode2.children:
+                        child.parent = newnode2
+
+                    self.insert_helper(parent,median_key, median_value)
+                    for i in range(len(parent.children)):
+                        if median_key in parent.children[i].keys:
+                            parent.children.pop(i)
+                            parent.children.insert(i,newnode2)
+                            parent.children.insert(i,newnode1)
+                            break
+                    
+                    self.split_promote(parent)
             # if the node we going to split is the root
             else:
 
@@ -220,12 +234,92 @@ class Btree():
         self.ADD_NULL(self.root)
 
 
-
-
-    # Delete.
     def delete(self, key: int):
-        # Fill in the details.
-        print(f'Delete: {key}') # This is just here to make the code run, you can delete it.
+        self.CLEAN_NULL(self.root)
+        self.delete_helper(self.root,key)
+        self.ADD_NULL(self.root)
+
+    def delete_helper(self, node, key):
+        m = self.m
+        current = node
+        # find the node first
+        while key not in current.keys:
+            move = False
+            for i in range(len(current.keys)):
+                if current.keys[i] > key:
+                    current = current.children[i]
+                    move = True
+                    break
+            if not move:
+                current = current.children[-1]
+
+        # if the node is a leaf
+        if self.is_leaf(current):
+            index = current.keys.index(key)
+            current.keys.pop(index)
+            current.values.pop(index)
+            self.check(current)
+
+        # if the node is not a leaf
+        else:
+            #replace with ios or iop
+            index = current.keys.index(key)
+            ios = current.children[index + 1]
+            while not self.is_leaf(ios):
+                ios = ios.children[0]
+            current.keys[index] = ios.keys[0]
+            current.values[index] = ios.values[0]
+
+            delete_helper(ios, ios.keys[0])
+
+    def check(self,node):
+
+        m = self.m
+
+        #if we have enough keys in the node
+        if len(node.keys) >= (m+1)// 2 - 1:
+            return
+        # the node is underfull
+        else:
+            parent = node.parent
+            index = parent.children.index(node)
+
+            # try right rotation with left sibling
+            if index > 0 and len(parent.children[index - 1].keys) > (m+1)// 2 - 1:
+                self.right_rotate(parent,index - 1)
+            # try left rotation with right sibling
+            elif index < len(parent.children) - 1 and len(parent.children[index + 1].keys) > (m+1)// 2 - 1:
+                self.left_rotate(parent,index)
+            
+            # if rotation is not an option, we do a merge
+            else:
+                if index > 0 and len(parent.children[index - 1].keys) == (m+1)// 2 - 1:
+                    self.merge(parent,index - 1)
+                elif i < len(parent.children) - 1 and  len(parent.children[index + 1].keys) == (m+1)// 2 - 1:
+                    self.merge(parent,index)
+
+    def merge(self,node,index):
+
+        if node == self.root and len(node.keys) == 1:
+            newnode = Node(keys = node.children[index].keys + node.keys + node.children[index+1].keys, values=node.children[index].values + node.values + node.children[index+1].values)
+            newnode.children = node.children[:index] + node
+            if len(node.children) > index + 2:
+                newnode.children.append(node.children[index + 2:])
+            
+            for child in newnode.children:
+                child.parent = newnode
+            self.root = newnode
+        else:
+            
+            k = node.keys.pop(index)
+            v = node.values.pop(index)
+            newnode = Node(keys = node.children[index].keys + [k] + node.children[index+1].keys, values=node.children[index].values + [v] + node.children[index+1].values)
+            newnode.parent = node
+            node.children.pop(index)
+            node.children.pop(index+1)
+            node.children.insert(index, newnode)
+
+
 
     # Search
     def search_helper(self, key, node, path):
@@ -248,35 +342,3 @@ class Btree():
             return json.dumps([self.root.values[self.root.keys.index(key)]])
         self.CLEAN_NULL(self.root)
         return json.dumps(self.search_helper(key,self.root,[]))
-
-# t = Btree(3)
-# t.insert(1,1)
-
-# t.insert(2,2)
-# t.insert(3,3)
-# t.insert(0,0)
-# t.insert(4,4)
-
-# t.insert(5,5)
-
-# t.insert(6,6)
-# t.insert(-1,-1)
-
-# t.insert(-2,-2)
-# t.insert(7,7)
-
-# print(t.dump())
-# t = Btree(3)
-# t.insert(77,"04PP93ZH9T")
-# t.insert(76,"HE8AWZKX91")
-# t.insert(99,"TG4CNACOBA")
-# t.insert(44,"RJCJ6AG6WG")
-# t.insert(21,"T34BOLK8K4")
-# t.insert(58,"DHJ9XLHDZP")
-
-# t.insert(67,"YPJMKFOU7L")
-# t.insert(86,"J3HMG3WIND")
-# t.insert(63,"X4EYGXZBBV")
-
-# t.insert(85,"31C5Y78YEI")
-# print(t.dump())

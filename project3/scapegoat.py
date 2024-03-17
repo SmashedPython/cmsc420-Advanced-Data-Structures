@@ -52,61 +52,11 @@ class SGtree():
             dict_repr = _to_dict(self.root)
         return json.dumps(dict_repr,indent=2)
 
-    def size(self,node):
-        if node is None:
-            return 0
-
-        leftsize = self.size(node.leftchild)
-        rightsize = self.size(node.rightchild)
-        return leftsize + rightsize + 1
-
-    def depth(self,node):
-        if node is None:
-            return -1
-
-        leftsize = self.depth(node.leftchild)
-        rightsize = self.depth(node.rightchild)
-        return max(leftsize,rightsize) + 1
-
-    def reconstruct(self, node):
-
-        def in_order_traverse(root):
-            if root == None:
-                return []
-
-            return in_order_traverse(root.leftchild) + [(root.key,root.value)] + in_order_traverse(root.rightchild)
-
-        
-        def construct(pairs):
-            if not pairs:
-                return None
-            mid = len(pairs)//2
-            root = Node(key = pairs[mid][0], value=  pairs[mid][1])
-
-            root.leftchild = construct(pairs[:mid])
-            if(root.leftchild != None):
-                root.leftchild.parent = root
-
-            root.rightchild = construct(pairs[mid+1:])
-            if(root.rightchild != None):
-                root.rightchild.parent = root
-            return root
-        
-        # Remove the next line and fill in code to restructure and assign the newroot.
-        pairs = in_order_traverse(node)
-        newroot = construct(pairs=pairs)
-        return(newroot)
-
     def insert(self, key: int, value: str):
-        if self.root == None:
-            self.root = Node(key,value)
-            self.m = 1
-            self.n = 1
-            return
-        
-        #perform insertion
-        node = Node(key = key, value = value)
+        # Fill in the details.
+        print(f'Insert: {key},{value}') # This is just here to make the code run, you can delete it.
 
+<<<<<<< HEAD
         prev = None
         current = self.root
 
@@ -193,17 +143,12 @@ class SGtree():
 
 
 
+=======
+    def delete(self, key: int):
+        # Fill in the details.
+        print(f'Delete: {key}') # This is just here to make the code run, you can delete it.
+>>>>>>> parent of 74f84fd (')
 
     def search(self, search_key: int) -> str:
-        value_list = []
-        current = self.root
-        while current.key != search_key:
-            value_list.append(current.value)
-            if current.key > search_key:
-                current = current.leftchild
-            else:
-                current = current.rightchild
-
-        value_list.append(current.value)
-        return  json.dumps(value_list)
-
+        # Fill in and tweak the return.
+        return json.dumps(None)

@@ -166,13 +166,9 @@ class SGtree():
             root.rightchild = self.delete_helper(root.rightchild,key)
         else:
             if root.leftchild == None:
-                if root.rightchild != None:
-                    root.rightchild.parent = root.parent
                 return root.rightchild
             
             elif root.rightchild == None:
-                if root.leftchild != None:
-                    root.leftchild.parent = root.parent
                 return root.leftchild
 
                 
@@ -186,9 +182,15 @@ class SGtree():
     def delete(self, key: int):
         self.root = self.delete_helper(self.root,key)
         self.n -= 1
-        if self.n < float(self.a / self.b * self.m):
+        if self.n < self.a/ self.b * self.m:
             self.root = self.reconstruct(self.root)
             self.m = self.n
+
+        
+
+    
+
+
 
 
 

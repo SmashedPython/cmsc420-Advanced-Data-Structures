@@ -81,6 +81,7 @@ class SGtree():
             if not pairs:
                 return None
             mid = len(pairs)//2
+
             root = Node(key = pairs[mid][0], value=  pairs[mid][1])
 
             root.leftchild = construct(pairs[:mid])
@@ -94,7 +95,9 @@ class SGtree():
         
         # Remove the next line and fill in code to restructure and assign the newroot.
         pairs = in_order_traverse(node)
+        # print(pairs)
         newroot = construct(pairs=pairs)
+        self.m = self.n
         return(newroot)
 
     def insert(self, key: int, value: str):
@@ -124,18 +127,25 @@ class SGtree():
         else:
             prev.rightchild = node
 
+        
+        if self.m == self.n:
+            self.m += 1
+
         self.n += 1
-        self.m += 1
+
         ratio = self.a/self.b
         d = self.depth(self.root)
 
         # check for scapegoat
         if d > math.log(self.n,1/ratio):
             # go back to find the scapegoat
+            # print(key)
             p = prev
             while p != None:
                 if self.size(p.leftchild)/self.size(p) > ratio or self.size(p.rightchild)/self.size(p) > ratio:
+                    # print("s",p.key)
                     newroot = self.reconstruct(p)
+                    # print("k", newroot.key)
                     if p == self.root:
                         self.root = newroot
                     else:
@@ -143,9 +153,9 @@ class SGtree():
 
                         if p.parent.key > newroot.key:
                             p.parent.leftchild = newroot
+                   
                         else:
                             p.parent.rightchild = newroot
-                            
                     break
 
                 else: p = p.parent
@@ -162,8 +172,12 @@ class SGtree():
         
         if key < root.key:
             root.leftchild = self.delete_helper(root.leftchild,key)
+            if root.leftchild != None:
+                root.leftchild.parent = root
         elif key > root.key:
             root.rightchild = self.delete_helper(root.rightchild,key)
+            if root.rightchild != None:
+                root.rightchild.parent = root
         else:
             if root.leftchild == None:
                 return root.rightchild
@@ -182,9 +196,9 @@ class SGtree():
     def delete(self, key: int):
         self.root = self.delete_helper(self.root,key)
         self.n -= 1
-        if self.n < self.a / self.b * self.m:
+        if self.n < (self.a / self.b) * self.m:
+            # print(key)
             self.root = self.reconstruct(self.root)
-            self.m = self.n
 
 
 

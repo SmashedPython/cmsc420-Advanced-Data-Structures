@@ -88,7 +88,6 @@ class KDtree():
 
         def split_helper(depth,data):      
             if self.splitmethod == "spread":
-                print("here")
                 max_spread = -1
                 split_index = -1
                 for i in range(self.k):

@@ -81,10 +81,14 @@ class KDtree():
 
         def find_split_value(data ,split_index):
             values = sorted(d.coords[split_index] for d in data)
-            return float(values[len(values) // 2])
+            if len(values)% 2 ==0:
+                return float(values[len(values) // 2 - 1] + values[len(values) // 2 ])/2
+            else:
+                return float(values[len(values) // 2])
 
         def split_helper(depth,data):      
             if self.splitmethod == "spread":
+                print("here")
                 max_spread = -1
                 split_index = -1
                 for i in range(self.k):

@@ -73,26 +73,51 @@ class KDtree():
     def insert(self,point:tuple[int],code:str):
         
         def split_leaf(leaf, split_index, split_value):
-            left_data = [d for d in leaf.data if d.coords[split_index] < split_value]
-            right_data = [d for d in leaf.data if d.coords[split_index] >= split_value]
+            sorted_data = sorted(leaf.data, key=lambda d: d.coords[split_index])
+
+            left_data = [d for d in sorted_data if d.coords[split_index] < split_value]
+            right_data = [d for d in sorted_data if d.coords[split_index] >= split_value]
             return NodeLeaf(left_data), NodeLeaf(right_data)
 
         def find_split_value(data ,split_index):
             values = sorted(d.coords[split_index] for d in data)
-            return values[len(values) // 2]
+            return float(values[len(values) // 2])
+
+        def split_helper(depth,data):      
+            if self.splitmethod == "spread":
+                max_spread = -1
+                split_index = -1
+                for i in range(self.k):
+                    dim_values = [d.coords[i] for d in data]
+                    spread = max(dim_values) - min(dim_values)
+                    if spread > max_spread:
+                        max_spread = spread
+                        split_index = i
+
+                split_value = find_split_value(data,split_index)
+            else:         
+                split_index = depth % self.k
+                split_value = find_split_value(data,split_index)
+            return split_index,split_value
 
         def insert_helper(node,depth):
+            if self.root == None:
+                return NodeLeaf([Datum(point, code)])
+
             if isinstance(node, NodeLeaf):
+
                 node.data.append(Datum(point, code))
+                # for i in node.data:
+                #     print(i.coords, i.code)
 
                 if len(node.data) > self.m:
                     # perform a split
-                    split_index = depth % self.k
-                    split_value = find_split_value(node.data,split_index)
+                    split_index, split_value = split_helper(depth,node.data)
+
                     leftchild, rightchild = split_leaf(node, split_index, split_value)
                     return NodeInternal(splitindex= split_index, splitvalue= split_value, leftchild= leftchild, rightchild= rightchild)
+                return node
 
-                
             else:
                 # we are in internal node
                 if point[node.splitindex] < node.splitvalue:
@@ -119,3 +144,9 @@ class KDtree():
         knnlist = []
         # The following return line can probably be left alone unless you make changes in variable names.
         return(json.dumps({"leaveschecked":leaveschecked,"points":[datum.to_json() for datum in knnlist]},indent=2))
+
+
+# tree = KDtree("spread",5,6)
+# tree.insert([4,14,10,12,9], "ZPJ")
+# tree.insert([9,8,7,15,5], "AVM")
+# print(tree.dump())

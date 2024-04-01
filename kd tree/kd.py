@@ -71,7 +71,38 @@ class KDtree():
     # Insert the Datum with the given code and coords into the tree.
     # The Datum with the given coords is guaranteed to not be in the tree.
     def insert(self,point:tuple[int],code:str):
-        thisisaplaceholder = True
+        
+        def split_leaf(leaf, split_index, split_value):
+            left_data = [d for d in leaf.data if d.coords[split_index] < split_value]
+            right_data = [d for d in leaf.data if d.coords[split_index] >= split_value]
+            return NodeLeaf(left_data), NodeLeaf(right_data)
+
+        def find_split_value(data ,split_index):
+            values = sorted(d.coords[split_index] for d in data)
+            return values[len(values) // 2]
+
+        def insert_helper(node,depth):
+            if isinstance(node, NodeLeaf):
+                node.data.append(Datum(point, code))
+
+                if len(node.data) > self.m:
+                    # perform a split
+                    split_index = depth % self.k
+                    split_value = find_split_value(node.data,split_index)
+                    leftchild, rightchild = split_leaf(node, split_index, split_value)
+                    return NodeInternal(splitindex= split_index, splitvalue= split_value, leftchild= leftchild, rightchild= rightchild)
+
+                
+            else:
+                # we are in internal node
+                if point[node.splitindex] < node.splitvalue:
+                    node.leftchild = insert_helper(node.leftchild,depth + 1)
+                else:
+                    node.rightchild = insert_helper(node.rightchild, depth + 1)
+                return node
+
+
+        self.root = insert_helper(self.root,0)
 
     # Delete the Datum with the given point from the tree.
     # The Datum with the given point is guaranteed to be in the tree.

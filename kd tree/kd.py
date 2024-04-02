@@ -135,7 +135,30 @@ class KDtree():
     # Delete the Datum with the given point from the tree.
     # The Datum with the given point is guaranteed to be in the tree.
     def delete(self,point:tuple[int]):
-        thisisaplaceholder = True
+        def delete_from_leaf(node, point):
+            for i, datum in enumerate(node.data):
+                if datum.coords == point:
+                    del node.data[i]
+                    break
+            return node, len(node.data) == 0
+
+        def delete_helper(node,point):
+            if isinstance(node, NodeLeaf):
+                node, is_empty = delete_from_leaf(node, point)
+                return None if is_empty else node
+            else:
+                if point[node.splitindex] < node.splitvalue:
+                    node.leftchild = delete_helper(node.leftchild, point)
+                else:
+                    node.rightchild = delete_helper(node.rightchild, point)
+                
+                if node.leftchild is None:
+                    return node.rightchild
+                elif node.rightchild is None:
+                    return node.leftchild
+                return node
+        
+        self.root = delete_helper(self.root, point)
 
     # Find the k nearest neighbors to the point.
     def knn(self,k:int,point:tuple[int]) -> str:
@@ -143,6 +166,16 @@ class KDtree():
         # The list should be a list of elements of type Datum.
         # While recursing, count the number of leaf nodes visited while you construct the list.
         # The following lines should be replaced by code that does the job.
+
+        def sqrt_euclidean_distance(p1,p2):
+            return sum((x - y) ** 2 for x, y in zip(p1, p2))
+
+        def bounding_box():
+            min_bound = [] * self.k
+            max_bound = [] * self.k
+            
+            return min_bound,max_bound
+
         leaveschecked = 0
         knnlist = []
         # The following return line can probably be left alone unless you make changes in variable names.

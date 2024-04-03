@@ -2,7 +2,7 @@ from __future__ import annotations
 import json
 import math
 from typing import List
-
+import heapq
 # Datum class.
 # DO NOT MODIFY.
 class Datum():
@@ -110,8 +110,6 @@ class KDtree():
             if isinstance(node, NodeLeaf):
 
                 node.data.append(Datum(point, code))
-                # for i in node.data:
-                #     print(i.coords, i.code)
 
                 if len(node.data) > self.m:
                     # perform a split
@@ -167,22 +165,112 @@ class KDtree():
         # While recursing, count the number of leaf nodes visited while you construct the list.
         # The following lines should be replaced by code that does the job.
 
-        def sqrt_euclidean_distance(p1,p2):
+        def sq_euclidean_distance(p1,p2):
             return sum((x - y) ** 2 for x, y in zip(p1, p2))
 
-        def bounding_box():
-            min_bound = [] * self.k
-            max_bound = [] * self.k
+        def bounding_box(node, min_bound, max_bound):
+            if isinstance(node, NodeLeaf):
+                for datum in node.data:
+                    for i in range(self.k):
+                        min_bound[i] = min(min_bound[i], datum.coords[i])
+                        max_bound[i] = max(max_bound[i], datum.coords[i])
+
+            else:
+                bounding_box(node.leftchild, min_bound, max_bound)
+                bounding_box(node.rightchild, min_bound, max_bound)
+
+            return 
+
+        def sq_distance_to_bondingbox(point,min_bound,max_bound):
+            distant = 0
+            for i in range(self.k):
+                if not (point[i] >= min_bound[i] and point[i] <= max_bound[i]):
+                    distant += min(abs(point[i] - min_bound[i]),abs(point[i] - max_bound[i]))**2
+
+            return distant
+
+        
+        def knn_helper(node,k,point):
+            nonlocal leaveschecked
+            nonlocal knnlist
+
+            if isinstance(node, NodeLeaf):
+                leaveschecked += 1
+
+                for datum in node.data:
+                    distance = sq_euclidean_distance(point, datum.coords)
+                    if len(knnlist) < k:
+                        heapq.heappush(knnlist, (-distance, datum))
+                    else:
+                        if distance < -knnlist[0][0] or (distance == - knnlist[0][0] and datum.code < knnlist[0][1].code):
+                            heapq.heapreplace(knnlist, (-distance, datum))
+                        
+            else:
+                if len(knnlist) < k:
+                    min_bound = [float('inf')] * self.k
+                    max_bound = [float('-inf')] * self.k
+                    bounding_box(node.leftchild, min_bound, max_bound)
+
+                    dist_left = sq_distance_to_bondingbox(point,min_bound,max_bound)
+
+                    min_bound = [float('inf')] * self.k
+                    max_bound = [float('-inf')] * self.k
+                    bounding_box(node.rightchild, min_bound, max_bound)
+                    dist_right = sq_distance_to_bondingbox(point,min_bound,max_bound)
+
+
+                    if dist_left <= dist_right:
+                        knn_helper(node.leftchild,k,point)
+                        if len(knnlist) < k or dist_right <= -knnlist[0][0]:
+
+                            knn_helper(node.rightchild,k,point)
+
+                    else:
+                        knn_helper(node.rightchild,k,point)
+                        if len(knnlist) < k or dist_left <= -knnlist[0][0]:
+
+                            knn_helper(node.leftchild,k,point)
+                else:
+                    min_bound = [float('inf')] * self.k
+                    max_bound = [float('-inf')] * self.k
+                    bounding_box(node,min_bound,max_bound)
+
+
+
+                    if sq_distance_to_bondingbox(point,min_bound,max_bound) <= -knnlist[0][0]:
+                        
+                        min_bound = [float('inf')] * self.k
+                        max_bound = [float('-inf')] * self.k
+                        bounding_box(node.leftchild, min_bound, max_bound)
+
+                        dist_left = sq_distance_to_bondingbox(point,min_bound,max_bound)
+
+                        min_bound = [float('inf')] * self.k
+                        max_bound = [float('-inf')] * self.k
+                        bounding_box(node.rightchild, min_bound, max_bound)
+                        dist_right = sq_distance_to_bondingbox(point,min_bound,max_bound)
+
+                        
+                        if dist_left <= dist_right:
+                            if dist_left <= -knnlist[0][0]:
+                                knn_helper(node.leftchild,k,point)
+                            if dist_right <= -knnlist[0][0]:
+                                knn_helper(node.rightchild,k,point)
+
+                        else:
+                            if dist_right <= -knnlist[0][0]:
+                                knn_helper(node.rightchild,k,point)
+                            if dist_left <= -knnlist[0][0]:
+                                knn_helper(node.leftchild,k,point)            
             
-            return min_bound,max_bound
 
         leaveschecked = 0
         knnlist = []
+
+        knn_helper(self.root,k,point)
+        knnlist = [heapq.heappop(knnlist)[1] for _ in range(len(knnlist))]
+        knnlist.reverse() 
+
         # The following return line can probably be left alone unless you make changes in variable names.
         return(json.dumps({"leaveschecked":leaveschecked,"points":[datum.to_json() for datum in knnlist]},indent=2))
 
-
-# tree = KDtree("spread",5,6)
-# tree.insert([4,14,10,12,9], "ZPJ")
-# tree.insert([9,8,7,15,5], "AVM")
-# print(tree.dump())

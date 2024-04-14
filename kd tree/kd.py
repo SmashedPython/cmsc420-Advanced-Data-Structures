@@ -114,17 +114,17 @@ class KDtree():
                 if len(node.data) > self.m:
                     # perform a split
                     split_index, split_value = split_helper(depth,node.data)
-
                     leftchild, rightchild = split_leaf(node, split_index, split_value)
+
                     return NodeInternal(splitindex= split_index, splitvalue= split_value, leftchild= leftchild, rightchild= rightchild)
                 return node
 
             else:
                 # we are in internal node
                 if point[node.splitindex] < node.splitvalue:
-                    node.leftchild = insert_helper(node.leftchild,depth + 1)
+                    node.leftchild = insert_helper(node.leftchild, node.splitindex + 1)
                 else:
-                    node.rightchild = insert_helper(node.rightchild, depth + 1)
+                    node.rightchild = insert_helper(node.rightchild, node.splitindex + 1)
                 return node
 
 
@@ -195,6 +195,7 @@ class KDtree():
             nonlocal knnlist
 
             if isinstance(node, NodeLeaf):
+                
                 leaveschecked += 1
 
                 for datum in node.data:
@@ -234,8 +235,6 @@ class KDtree():
                     min_bound = [float('inf')] * self.k
                     max_bound = [float('-inf')] * self.k
                     bounding_box(node,min_bound,max_bound)
-
-
 
                     if sq_distance_to_bondingbox(point,min_bound,max_bound) <= -knnlist[0][0]:
                         

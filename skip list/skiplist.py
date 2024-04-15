@@ -94,7 +94,21 @@ class SkipList():
     # The key is guaranteed to not be in the skiplist.
     # Check if we need to rebuild and do so if needed.
     def insert(self,key,value,toplevel):
-        print('Placeholder')
+        if self.headnode == None:
+            self.initialize(maxlevel=self.maxlevel)
+        
+        #perform searhing:
+        node = Node(key = key,value = value,toplevel=toplevel, printers = [None] * (1+toplevel))
+        prev = self.headnode
+        current = None
+        while 
+
+
+        if 1 + math.log2(self.nodecount) > self.maxlevel:
+            rebuild()
+        
+
+
 
     # Delete node with the given key.
     # The key is guaranteed to be in the skiplist.

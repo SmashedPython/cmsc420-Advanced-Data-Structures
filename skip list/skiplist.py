@@ -99,9 +99,25 @@ class SkipList():
         
         #perform searhing:
         node = Node(key = key,value = value,toplevel=toplevel, printers = [None] * (1+toplevel))
-        prev = self.headnode
-        current = None
-        while 
+        bound1 = self.headnode
+        bound2 = self.tailnode
+
+        in_table = [self.headnode]*toplevel
+        out_table = [self.tailnode]*toplevel
+
+        while bound1.pointers[0] != bound2:
+            for i in range(len(bound1.pointers) - 1, 0):
+                if bound1.pointers[i].key < key:
+                    in_table[i] = bound1
+                    bound1 = bound1.pointers[i]
+                    break
+                if  bound1.pointers[i].key > key:
+                    out_table[i] = bound2
+                    bound2 = bound1.pointers[i]
+                    break
+        
+
+
 
 
         if 1 + math.log2(self.nodecount) > self.maxlevel:

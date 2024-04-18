@@ -102,8 +102,8 @@ class SkipList():
         bound1 = self.headnode
         bound2 = self.tailnode
 
-        in_table = [self.headnode]*toplevel
-        out_table = [self.tailnode]*toplevel
+        in_table = [self.headnode]*(toplevel + 1)
+        out_table = [self.tailnode]*(toplevel + 1)
 
         while bound1.pointers[0] != bound2:
             for i in range(len(bound1.pointers) - 1, 0):
@@ -119,13 +119,18 @@ class SkipList():
                     break
         
 
+        node.pointers = out_table[i]
+        for i in range(len(in_table)):
+            in_table[i].pointers[i] = node
 
-
+        node.pointers[0] = bound2
+        bound1.pointers[0] = node
 
         if 1 + math.log2(self.nodecount) > self.maxlevel:
-            rebuild()
+            self.rebuild()
         
-
+    def rebuild(self):
+        return
 
 
     # Delete node with the given key.

@@ -94,11 +94,13 @@ class SkipList():
     # The key is guaranteed to not be in the skiplist.
     # Check if we need to rebuild and do so if needed.
     def insert(self,key,value,toplevel):
-        if self.headnode == None:
+        if self.nodecount == None:
             self.initialize(maxlevel=self.maxlevel)
+            self.nodecount = 0
         
         #perform searhing:
-        node = Node(key = key,value = value,toplevel=toplevel, printers = [None] * (1+toplevel))
+        print(key)
+        node = Node(key = key,value = value,toplevel=toplevel, pointers= [None] * (1+toplevel))
         bound1 = self.headnode
         bound2 = self.tailnode
 
@@ -106,25 +108,47 @@ class SkipList():
         out_table = [self.tailnode]*(toplevel + 1)
 
         while bound1.pointers[0] != bound2:
-            for i in range(len(bound1.pointers) - 1, 0):
+            print(bound1.key)
+            print(bound2.key)
+            for i in range(len(bound1.pointers) - 1, -1,-1):
+                print(i)
+                print("at",bound1.pointers[i].key)
                 if bound1.pointers[i].key < key:
-                    if i < toplevel:
-                        in_table[i] = bound1
+                    
                     bound1 = bound1.pointers[i]
+                    if i < toplevel+1:
+                        in_table = [bound1]*(i+1) + in_table[i+1:]
+                        print("herererer1")
+                    print("update bound1 ", bound1.key)
                     break
-                if  bound1.pointers[i].key > key:
-                    if i < toplevel:
-                        out_table[i] = bound2
+                if  bound1.pointers[i].key > key and bound1.pointers[i] != bound2:
                     bound2 = bound1.pointers[i]
+                    if i <toplevel+1:
+                        out_table = [bound2] * (i+1) + out_table[i+1:]
+                        print("herererer2")
+                        print(bound2.key)
+                    print("update bound2 ", bound2.key)
                     break
-        
 
-        node.pointers = out_table[i]
+            print("update bound1 now", bound1.key)
+
+        for i in range(len(in_table)):
+            print("intable", in_table[i].key)
+        print(out_table)
+        for i in range(len(out_table)):
+            print("outtable",out_table[i].key)
+
+        node.pointers = out_table
         for i in range(len(in_table)):
             in_table[i].pointers[i] = node
 
+        print("now add")
+        print(bound1.key)
+        print(bound2.key)
         node.pointers[0] = bound2
         bound1.pointers[0] = node
+
+        self.nodecount += 1
 
         if 1 + math.log2(self.nodecount) > self.maxlevel:
             self.rebuild()

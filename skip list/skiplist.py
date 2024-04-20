@@ -109,39 +109,71 @@ class SkipList():
         while bound1.pointers[0] != bound2:
  
             for i in range(len(bound1.pointers) - 1, -1,-1):
-
+                # if(key ==49):
+                #     print("intable of", key)
+                #     print(", ".join(str(a.key) for a in in_table))
                 if bound1.pointers[i].key < key:
                     bound1 = bound1.pointers[i]
 
-                    in_table = [bound1]*(i+1) + in_table[i+1:]
+                    in_table = [bound1]*(i+1) + in_table[i+2:]
                     in_table = in_table[:toplevel+2]
 
                     break
+
                 if  bound1.pointers[i].key > key and bound1.pointers[i].key < bound2.key:
                     bound2 = bound1.pointers[i]
 
-                    out_table = [bound2] * (i+1) + out_table[i+1:]
+                    out_table = [bound2] * (i+1) + out_table[i+2:]
                     out_table = out_table[:toplevel+2]
                     break
-        print("intable of", key)
-        print(", ".join(str(a.key) for a in in_table))
-        # for i in range(len(in_table)):
-        #     print("intable", in_table[i].key)
-        # print(out_table)
+
+
         # for i in range(len(out_table)):
         #     print("outtable",out_table[i].key)
-
+        
         node.pointers = out_table
         for i in range(len(in_table)):
             in_table[i].pointers[i] = node
-
+        # if(key ==49):
+        #     print("intable of", key)
+        #     print(", ".join(str(a.key) for a in in_table))
 
         self.nodecount += 1
 
         if 1 + math.log2(self.nodecount) > self.maxlevel:
+            # print("rebuild at", key)
             self.rebuild()
         
     def rebuild(self):
+        def get_level(i):
+            level = 0
+            while i % 2 == 0 and level <= self.maxlevel:
+                level += 1
+                i //= 2
+            return level
+
+        pointer_list = []
+        new_maxlevel = 2 * self.maxlevel
+        current = self.headnode
+
+        while current.key != float('inf'):
+            # print(current.key)
+            pointer_list.append((current.key,current.value))
+            current = current.pointers[0]
+
+        pointer_list = pointer_list[1:]
+
+        self.maxlevel = new_maxlevel
+        self.headnode = None
+        self.tailnode = None
+        self.nodecount = None
+        for i in range(len(pointer_list)):
+            level = get_level(i+1)
+            # print("level",level)
+            # print(pointer_list[i][0])
+            self.insert(key= pointer_list[i][0],value = pointer_list[i][1],toplevel= level)
+
+        
         return
 
 
@@ -157,9 +189,9 @@ class SkipList():
         A = ['your list gets constructed here']
         return json.dumps(A,indent = 2)
 
-s = SkipList(maxlevel=7)
-s.insert(key = 48,value= "1",toplevel= 0)
-s.insert(key =2,value= "1",toplevel=2)
-s.insert(key =49,value= "1",toplevel=3)
-s.insert(key =22,value= "1",toplevel=0)
-print(s.dump())
+# s = SkipList(maxlevel=2)
+# s.insert(key = 48,value= "1",toplevel= 0)
+# s.insert(key =2,value= "1",toplevel=2)
+# s.insert(key =49,value= "1",toplevel=2)
+# s.insert(key =22,value= "1",toplevel=0)
+# print(s.dump())

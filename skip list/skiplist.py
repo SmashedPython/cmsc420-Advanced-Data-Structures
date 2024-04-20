@@ -99,7 +99,6 @@ class SkipList():
             self.nodecount = 0
         
         #perform searhing:
-        print(key)
         node = Node(key = key,value = value,toplevel=toplevel, pointers= [None] * (1+toplevel))
         bound1 = self.headnode
         bound2 = self.tailnode
@@ -108,45 +107,34 @@ class SkipList():
         out_table = [self.tailnode]*(toplevel + 1)
 
         while bound1.pointers[0] != bound2:
-            print(bound1.key)
-            print(bound2.key)
+ 
             for i in range(len(bound1.pointers) - 1, -1,-1):
-                print(i)
-                print("at",bound1.pointers[i].key)
+
                 if bound1.pointers[i].key < key:
-                    
                     bound1 = bound1.pointers[i]
-                    if i < toplevel+1:
-                        in_table = [bound1]*(i+1) + in_table[i+1:]
-                        print("herererer1")
-                    print("update bound1 ", bound1.key)
+
+                    in_table = [bound1]*(i+1) + in_table[i+1:]
+                    in_table = in_table[:toplevel+2]
+
                     break
-                if  bound1.pointers[i].key > key and bound1.pointers[i] != bound2:
+                if  bound1.pointers[i].key > key and bound1.pointers[i].key < bound2.key:
                     bound2 = bound1.pointers[i]
-                    if i <toplevel+1:
-                        out_table = [bound2] * (i+1) + out_table[i+1:]
-                        print("herererer2")
-                        print(bound2.key)
-                    print("update bound2 ", bound2.key)
+
+                    out_table = [bound2] * (i+1) + out_table[i+1:]
+                    out_table = out_table[:toplevel+2]
                     break
-
-            print("update bound1 now", bound1.key)
-
-        for i in range(len(in_table)):
-            print("intable", in_table[i].key)
-        print(out_table)
-        for i in range(len(out_table)):
-            print("outtable",out_table[i].key)
+        print("intable of", key)
+        print(", ".join(str(a.key) for a in in_table))
+        # for i in range(len(in_table)):
+        #     print("intable", in_table[i].key)
+        # print(out_table)
+        # for i in range(len(out_table)):
+        #     print("outtable",out_table[i].key)
 
         node.pointers = out_table
         for i in range(len(in_table)):
             in_table[i].pointers[i] = node
 
-        print("now add")
-        print(bound1.key)
-        print(bound2.key)
-        node.pointers[0] = bound2
-        bound1.pointers[0] = node
 
         self.nodecount += 1
 
@@ -168,3 +156,10 @@ class SkipList():
     def search(self,key) -> str:
         A = ['your list gets constructed here']
         return json.dumps(A,indent = 2)
+
+s = SkipList(maxlevel=7)
+s.insert(key = 48,value= "1",toplevel= 0)
+s.insert(key =2,value= "1",toplevel=2)
+s.insert(key =49,value= "1",toplevel=3)
+s.insert(key =22,value= "1",toplevel=0)
+print(s.dump())

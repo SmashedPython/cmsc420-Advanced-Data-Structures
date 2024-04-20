@@ -1,6 +1,7 @@
-initialize,7
-insert,1,PCXZKVDAXP,0
-insert,44,NZTZOECQPV,0
-insert,38,QSBPTUBEOO,1
-insert,39,IXVKILSRAY,1
+initialize,10
+insert,48,EJYOEZFTUX,0
+insert,2,WLFDDEVKGL,2
+insert,49,ILIDXTCCYU,3
+delete,49
+insert,22,FPDNCMBGBQ,0
 dump

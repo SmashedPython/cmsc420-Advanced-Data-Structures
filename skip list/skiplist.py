@@ -115,28 +115,29 @@ class SkipList():
                 if bound1.pointers[i].key < key:
                     bound1 = bound1.pointers[i]
 
-                    in_table = [bound1]*(i+1) + in_table[i+2:]
-                    in_table = in_table[:toplevel+2]
+                    in_table = [bound1]*(i+1) + in_table[i+1:]
+                    in_table = in_table[:toplevel+1]
 
                     break
 
                 if  bound1.pointers[i].key > key and bound1.pointers[i].key < bound2.key:
                     bound2 = bound1.pointers[i]
 
-                    out_table = [bound2] * (i+1) + out_table[i+2:]
-                    out_table = out_table[:toplevel+2]
+                    out_table = [bound2] * (i+1) + out_table[i+1:]
+                    out_table = out_table[:toplevel+1]
                     break
 
 
         # for i in range(len(out_table)):
         #     print("outtable",out_table[i].key)
         
-        node.pointers = out_table
-        for i in range(len(in_table)):
-            in_table[i].pointers[i] = node
         # if(key ==49):
         #     print("intable of", key)
         #     print(", ".join(str(a.key) for a in in_table))
+        node.pointers = out_table
+        for i in range(len(in_table)):
+            in_table[i].pointers[i] = node
+        
 
         self.nodecount += 1
 
@@ -193,5 +194,4 @@ class SkipList():
 # s.insert(key = 48,value= "1",toplevel= 0)
 # s.insert(key =2,value= "1",toplevel=2)
 # s.insert(key =49,value= "1",toplevel=2)
-# s.insert(key =22,value= "1",toplevel=0)
 # print(s.dump())

@@ -176,22 +176,62 @@ class SkipList():
 
         
         return
-
+    
 
     # Delete node with the given key.
     # The key is guaranteed to be in the skiplist.
     def delete(self,key):
-        print('Placeholder')
+        in_table = [self.headnode]*(self.maxlevel + 1)
+        node = self.headnode
+
+        while(node.key != key):
+            for i in range(len(node.pointers) - 1, -1,-1):
+                if node.pointers[i].key <= key:
+                    if node.pointers[i].key != key:
+                        node = node.pointers[i]
+                        in_table = [node]*(i+1) + in_table[i+1:]
+                        in_table = in_table[:self.maxlevel+1]
+                        break
+                    else:
+                        in_table = [node] + in_table[1:]
+                        in_table = in_table[:self.maxlevel+1]
+                        if i == 0:
+                            node = node.pointers[i]
+
+
+
+        in_table = in_table[:len(node.pointers)]
+
+        # print(", ".join(str(a.key) for a in in_table))
+        for i in range(len(node.pointers)):
+            in_table[i].pointers[i] = node.pointers[i]
+            
+        self.nodecount -= 1
+
+        return 
+    
 
     # Search for the given key.
     # Construct a list of all the keys in all the nodes visited during the search.
     # Append the value associated to the given key to this list.
     def search(self,key) -> str:
-        A = ['your list gets constructed here']
+        A = []
+        node = self.headnode
+        while(node.key != key):
+            A.append(node.key)
+            for i in range(len(node.pointers) - 1, -1,-1):
+                if node.pointers[i].key <= key:
+                    node = node.pointers[i]
+                    break
+        
+        A.append(node.key)
+        A.append(node.value)
+        
         return json.dumps(A,indent = 2)
 
 # s = SkipList(maxlevel=2)
 # s.insert(key = 48,value= "1",toplevel= 0)
 # s.insert(key =2,value= "1",toplevel=2)
 # s.insert(key =49,value= "1",toplevel=2)
+# s.delete(key= 48)
 # print(s.dump())

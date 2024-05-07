@@ -11,7 +11,7 @@ class Graph():
         # IMPORTANT!!!
         # Replace the next line so the Laplacian is a nodecount x nodecount array of zeros.
         # You will need to do this in order for the code to run!
-        self.laplacian = np.zeros((nodecount,nodecount),dtype = np.complex128)
+        self.laplacian = np.zeros((nodecount,nodecount))
 
     # Add an edge to the Laplacian matrix.
     # An edge is a pair [x,y].

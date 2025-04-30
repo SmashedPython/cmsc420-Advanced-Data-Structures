@@ -1,4 +1,4 @@
-# 🌲 CMSC420: Advanced Data Structures
+# 🌲 Advanced Data Structures
 
 This repository contains Python implementations of several advanced data structures developed as part of **Advanced Data Structures**. These structures include both balanced trees and probabilistic or spatial partitioning structures, each optimized for specific tasks in efficient data organization and search.
 

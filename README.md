@@ -179,4 +179,15 @@ This code is provided for academic and personal learning use only. Please cite i
 
 ---
 
+## 👿 Disclaim
+
+This repository contains code I personally wrote for learning purposes during my time as a student.
+It is not intended to be used for completing assignments or academic submissions in any form.
+
+Please do not copy, reuse, or submit any portion of this code to fulfill coursework requirements at any institution.
+Doing so may violate your school’s academic integrity policy.
+
+All work here is shared for educational and reference purposes only. I do not take responsibility for any misuse.
+---
+
 **Course:** Advanced Data Structures  
